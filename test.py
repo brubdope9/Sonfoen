@@ -16,7 +16,9 @@ while True:
   
   case "decode":
     for i in range(100):
-      ranBinary(15)
+      while True:
+        ranBinary(15)
+        wait(0.1)
     
   case 'clear':
     syst('clear')

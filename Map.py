@@ -2,7 +2,8 @@ from random import randint, choice
 from Items import items
 
 class map:
-  plainsTerrain = ["grass", 'dirt', 'flowerbed', 'tree', 'cave', ]
+  areaTypes = ['plains', 'desert']
+  plainsTerrain = ["grass", 'dirt', 'flowerbed', 'cave']
   
   
   
@@ -19,9 +20,11 @@ class map:
   def generate(self):
     for x in range(self.width):
       for y in range(self.height): 
-        if self.type == 'plains':
+        match self.type:
           
-          self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': choice(map.terrain), 'items': []} 
+          case "plains":
+            self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': choice(map.plainsTerrain), 'items': []} 
+
 
   def add_item(self, x:int, y:int, item:str):
     self.tiledata[f"{x}, {y}"]['items'].append(item)
