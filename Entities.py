@@ -1,6 +1,7 @@
 from Player import Player
 
 class Entity(Player):
+    super().updateAll()
     def __init__(self, pos:list,):
         super().__init__(pos)
         self.hp = 100

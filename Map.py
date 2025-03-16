@@ -1,5 +1,6 @@
 from random import randint, choice
 from Items import items
+from noise import pnoise2 as perlin
 
 class map:
   areaTypes = ['plains', 'desert']
@@ -20,10 +21,8 @@ class map:
   def generate(self):
     for x in range(self.width):
       for y in range(self.height): 
-        match self.type:
-          
-          case "plains":
-            self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': choice(map.plainsTerrain), 'items': []} 
+        
+        self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': choice(map.plainsTerrain), 'items': []} 
 
 
   def add_item(self, x:int, y:int, item:str):
@@ -34,4 +33,5 @@ class map:
 
 testMap = map(10, 10)
 print(testMap.tiledata)
-      
+
+
