@@ -20,5 +20,6 @@ class Entity(Player):
                        'weapon': None, 
                        'shield': None}
         self.money = 0
-class Enemy(Entity):
-    pass
+        self.loot = []
+        
+

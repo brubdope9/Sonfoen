@@ -1,7 +1,6 @@
 from main import color
 from Items import items
-from Map import map
-from Actions import Actions
+# from Actions import Actions
 class Player:
   def __init__(self, pos:list):
     self.pos = pos
@@ -40,7 +39,7 @@ class Player:
     
     self.money = 0
     self.name = None
-    self.actions = Actions()
+    
   
   def checkEquips(self):
       # Reset player's attack, defense, and magic damage to base values
@@ -99,18 +98,10 @@ class Player:
       return True
 
   def updateAll(self):
-    # Check if player has equipped items
     self.checkEquips()
-
-    # Check if player is alive
     self.checkAlive()
-    
-    # Check if player leveled up  
     self.check_level_up()
 
   def add_item(self, item:str):
     if item in items:
-      self.inventory.append(items[item])
-    else: 
-      raise ValueError(f"{color.red}Item {item} not found in items list{color.end}")
-    
+      pass

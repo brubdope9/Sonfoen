@@ -1,5 +1,7 @@
 from random import randint, choice
 import os
+import curses
+import threading
 class color:
    purple = '\033[38;5;135m'
    cyan = '\033[38;5;51m'
@@ -12,8 +14,11 @@ class color:
    darkgreen = '\033[38;5;34m'
    magenta = '\033[38;5;201m'
    orange = '\033[38;5;214m'
+   tan = '\033[38;5;220m'
    bold = '\033[1m'
    underline = '\033[4m'
    end = '\033[0m'
 def clear():
   os.system('clear')
+itemChance = randint(1, 100)
+'''if 

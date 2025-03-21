@@ -1,3 +1,5 @@
-items = {'sword': {'price': 500, 'damage': 20, 'durability': 100  } , 'shield': {'price': 250, 'defense': 20, 'durability': 100},
- 'bow': {'price': 300, 'damage': 15, 'durability': 100},
- 'potion': {'price': 50, 'healing': 30, 'durability': 100}}
+items = {'sword': {'name': 'sword', 'damage': 10, 'durability': 100, 'type': 'weapon'},
+         'shield': {'name': 'shield', 'defense': 5, 'durability': 100, 'type': 'armor'},
+         'potion': {'name': 'potion', 'heal': 20, 'type': 'consumable'},
+         'gold': {'name': 'gold', 'value': 1, 'type': 'currency'}
+        }
