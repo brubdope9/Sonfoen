@@ -18,7 +18,7 @@ class Player:
 
     self.mana = 100
     self.baseMaxMana = 100
-    self.max_mana = 100 
+    self.maxMana = 100 
     self.baseMagicDamage = 10
     self.magicDamage = 10
     self.magicDefense = 5
@@ -39,7 +39,6 @@ class Player:
     
     self.money = 0
     self.name = None
-    
   
   def checkEquips(self):
       # Reset player's attack, defense, and magic damage to base values
@@ -61,8 +60,22 @@ class Player:
               if 'maxHp' in equip:
                   self.maxHp += equip['maxHp']
               if 'maxMana' in equip:
-                  self.max_mana += equip['maxMana']
-
+                  self.maxMana += equip['maxMana']
+  def printStats(self):
+     print(f'health: {self.hp}/{self.maxHp} \ndamage: {self.baseDamage} \nmana: {self.mana}/{self.maxMana}')
+  
+  def checkBounds(self):
+     try: 
+        if self.pos[0] > self.map.width:
+           self.pos[0] = self.pos[0] = self.map.widtl
+     except AttributeError:
+        pass
+     try: 
+        if self.pos[1] > self.map.height:
+           self.pos[1] = self.pos[1] = self.map.height
+     except AttributeError:
+        pass
+    
   def check_level_up(self):
     # Check if player leveled up  
     if self.exp >= self.exp_to_level:
@@ -81,21 +94,22 @@ class Player:
       self.defense += 5
 
       self.baseMaxMana += 10
-      self.max_mana = self.baseMaxMana
-      self.mana = self.max_mana
+      self.maxMana = self.baseMaxMana
+      self.mana = self.maxMana
 
       print(f"{color.green}You leveled up to level {self.level}!{color.end}")
       print(f"{color.green}Your max hp is now {self.maxHp}!{color.end}")
       print(f"{color.green}Your damage is now {self.damage}!{color.end}")
       print(f"{color.green}Your defense is now {self.defense}!{color.end}")
       
-      print(f"{color.green}Your max mana is now {self.max_mana}!{color.end}")
+      print(f"{color.green}Your max mana is now {self.maxMana}!{color.end}")
   def checkAlive(self):
     if self.hp <= 0:
       self.isAlive = False
       return False
     else:
       return True
+
 
   def updateAll(self):
     self.checkEquips()
@@ -105,3 +119,9 @@ class Player:
   def add_item(self, item:str):
     if item in items:
       pass
+
+
+
+P = Player([0,0])
+
+P.printStats()

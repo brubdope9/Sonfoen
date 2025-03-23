@@ -31,12 +31,13 @@ class map:
   
   
   
-  def __init__(self, width:int, height:int, type:str = 'plains'):
+  def __init__(self, width:int, height:int, type:str = 'plains', cgen:bool = False):
     self.width = width
     self.height = height
     self.type = type
     self.tiledata = {}
-    map.generate(self)
+    if cgen==False:
+      map.generate(self)
     self.overworld = self.tiledata
 
 
@@ -141,10 +142,8 @@ class map:
     
         
 
-testMap = map(145, 20 )
+#testMap = map(145, 20 )
 #print(testMap.tiledata)
 #testMap.display()
-testMap.displaysolid()
+#testMap.displaysolid()
 # testMap.printfeatures()
-
-  
