@@ -4,20 +4,32 @@ from main import color
 from opensimplex import OpenSimplex
 
 gen = OpenSimplex(seed=randint(1, 1000000))
-def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0):
+def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0, seed = 0):
           """ Mimics pnoise2 with octaves, persistence, and lacunarity """
           amplitude = 1.0  # Controls how strong each layer of noise is
           frequency = 1.0  # Controls how zoomed in the noise is
           value = 0.0  # Stores the final noise value 
           max_amplitude = 0.0  # Used for normalization
-          for _ in range(octaves):
-            value += gen.noise2(x * frequency, y * frequency) * amplitude
-            max_amplitude += amplitude
-            amplitude *= persistence  # Reduces amplitude for next octave
-            frequency *= lacunarity  # Increases frequency for next octave
+          if seed != 0:
+              for _ in range(octaves):
+                  value += OpenSimplex(seed=seed).noise2(x * frequency, y * frequency) * amplitude
+                  max_amplitude += amplitude
+                  amplitude *= persistence  # Reduces amplitude for next octave
+                  frequency *= lacunarity  # Increases frequency for next octave
+
+          else:
+            for _ in range(octaves):
+                value += gen.noise2(x * frequency, y * frequency) * amplitude
+                max_amplitude += amplitude
+                amplitude *= persistence  # Reduces amplitude for next octave
+                frequency *= lacunarity  # Increases frequency for next octave
 
           return value / max_amplitude  # Normalize to keep values between -1 and 1 t
-  
+
+
+
+
+
 
 class Map:
   terrain = ['plains', 'forest', 'mountain', 'water', 'beach']
@@ -88,7 +100,49 @@ class Map:
             
 
   def cgen(self): # generate with chunking
-    pass
+      x_offset = randint(1, 10000)
+      y_offset = x_offset / 2
+
+      for x in range(self.width):
+          for y in range(self.height):
+              # scale = 55.6
+              scale = 10
+
+              # terrainValue  = perlin(x/scale, y/scale, octaves=2, persistence=0.6, lacunarity=2.5, base=base,)
+              terrainValue = octave_noise2((x + x_offset) / scale, (y + y_offset) / scale, octaves=6, persistence=0.3,
+                                           lacunarity=3.0)
+
+              if terrainValue >= 0.53:
+                  self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'mountain', 'items': [], 'features': []}
+              elif terrainValue >= 0.36:
+                  self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'forest', 'items': [], 'features': []}
+              elif terrainValue >= 0.045:
+                  self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'plains', 'items': [], 'features': []}
+              elif terrainValue >= -0.1:
+                  self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'beach', 'items': [], 'features': []}
+              else:
+                  self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'water', 'items': [], 'features': []}
+              # add features
+              featureChance = randint(1, 100)
+              if featureChance <= Map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
+                  numfeatures = randint(1, 3)
+                  match numfeatures:
+                      case 1:
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                      case 2:
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+
+                      case 3:
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                          self.tiledata[(x, y)]['features'].append(
+                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
         
 
   def display(self):

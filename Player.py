@@ -62,7 +62,7 @@ class Player:
               if 'maxMana' in equip:
                   self.maxMana += equip['maxMana']
   def printStats(self):
-     print(f'health: {self.hp}/{self.maxHp} \ndamage: {self.damage} \nmana: {self.mana}/{self.maxMana}')
+     print(f'health: {self.hp}/{self.maxHp} \ndamage: {self.damage} \nmana: {self.mana}/{self.maxMana} \ndefense:{self.defense}')
   
 
     
