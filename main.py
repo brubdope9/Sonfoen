@@ -1,6 +1,6 @@
 from random import randint, choice
 import os
-import unicurses as c
+# import unicurses as c
 import threading
 class color:
    purple = '\033[38;5;135m'
@@ -20,4 +20,4 @@ class color:
    end = '\033[0m'
 def clear():
   os.system('clear')
-c.initscr()
+# c.initscr()

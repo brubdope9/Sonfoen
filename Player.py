@@ -42,17 +42,17 @@ class Player:
   
   def checkEquips(self):
       # Reset player's attack, defense, and magic damage to base values
-      self.damage = 10
-      self.defense = 5
-      self.magicDamage = 10
+      self.damage = self.baseDamage
+      self.defense = self.baseDefense
+      self.magicDamage =  self.baseMagicDamage
 
       # Update player's stats based on equipped items
       for equip in self.equips.values():
-          if equip:
+          if equip is not None:
               if 'defense' in equip:
                   self.defense += equip['defense']
-              if 'attack' in equip:
-                  self.damage += equip['attack']
+              if 'damage' in equip:
+                  self.damage += equip['damage']
               if 'magicDamage' in equip:
                   self.magicDamage += equip['magicDamage']
               if 'magicDefense' in equip:
@@ -62,19 +62,9 @@ class Player:
               if 'maxMana' in equip:
                   self.maxMana += equip['maxMana']
   def printStats(self):
-     print(f'health: {self.hp}/{self.maxHp} \ndamage: {self.baseDamage} \nmana: {self.mana}/{self.maxMana}')
+     print(f'health: {self.hp}/{self.maxHp} \ndamage: {self.damage} \nmana: {self.mana}/{self.maxMana}')
   
-  def checkBounds(self):
-     try: 
-        if self.pos[0] > self.map.width:
-           self.pos[0] = self.pos[0] = self.map.widtl
-     except AttributeError:
-        pass
-     try: 
-        if self.pos[1] > self.map.height:
-           self.pos[1] = self.pos[1] = self.map.height
-     except AttributeError:
-        pass
+
     
   def check_level_up(self):
     # Check if player leveled up  
@@ -118,10 +108,24 @@ class Player:
 
   def add_item(self, item:str):
     if item in items:
-      pass
-
+      self.inventory.append(items[item])
+  def equipItem(self, item:str):
+    if item in items:
+      self.equips[items[item]['slot']] = items[item]
 
 
 P = Player([0,0])
 
 P.printStats()
+print('\n'*5)
+
+P.add_item('sword')
+P.equipItem('sword')
+P.add_item('shield')
+P.equipItem('shield')
+P.updateAll()
+
+print(P.equips['weapon'])
+
+P.printStats()
+

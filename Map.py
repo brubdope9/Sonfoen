@@ -19,7 +19,7 @@ def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0):
           return value / max_amplitude  # Normalize to keep values between -1 and 1 t
   
 
-class map:
+class Map:
   terrain = ['plains', 'forest', 'mountain', 'water', 'beach']
   features = {'plains':['bush', 'tree' ],'forest': ['tree', 'bush'], 'mountain': ['boulder', 'cave'], 'water': ['seaweed', 'coral'], 'beach': ['palm tree', ]}
   naturalItems = {'plains':[],'forest': ['stick', 'rock', 'mushroom'], 'mountain': ['rock', 'gem', 'fossil'], 'water': ['fish', 'shell', 'seaweed'], 'beach': ['shell', 'seaweed', 'rock']}
@@ -36,69 +36,66 @@ class map:
     self.height = height
     self.type = type
     self.tiledata = {}
-    if cgen==False:
-      map.generate(self)
-    self.overworld = self.tiledata
+    if not cgen:
+      Map.generate(self)
+    else:
+        self.overworld = self.tiledata
+        self.chunked = True
+    self.cseeds = {}
 
-
-    
-  # chunking not yet imple
 
 
   def generate(self):
     x_offset = randint(1, 10000)
     y_offset = x_offset/2
-    col = 0
+
     for x in range(self.width):
-      l = 0
-      for y in range(self.height): 
-        scale = 55.6
-        scale = 3 # 10
+      for y in range(self.height):
+        # scale = 55.6
+        scale = 10
         
         # terrainValue  = perlin(x/scale, y/scale, octaves=2, persistence=0.6, lacunarity=2.5, base=base,)
         terrainValue  = octave_noise2((x+x_offset)/scale, (y+y_offset)/scale, octaves=6, persistence=0.3, lacunarity=3.0)
-        '''if terrainValue < 0:
-          terrainValue *= -1'''
-        
+
+
         if terrainValue >= 0.53:
-          self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': 'mountain', 'items': [], 'features': []}
-        elif terrainValue >= 0.36:  
-          self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': 'forest', 'items': [], 'features': []} 
+          self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'mountain', 'items': [], 'features': []}
+        elif terrainValue >= 0.36:
+          self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'forest', 'items': [], 'features': []}
         elif terrainValue >= 0.045:
-          self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': 'plains', 'items': [],'features': []}
+          self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'plains', 'items': [],'features': []}
         elif terrainValue  >= -0.1:
-           self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': 'beach', 'items': [],'features': []}
+           self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'beach', 'items': [],'features': []}
         else:
-          self.tiledata[f"{x}, {y}"] = {'tile':[x, y],'terrain': 'water', 'items': [],'features': []}
+          self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'water', 'items': [],'features': []}
          # add features
         featureChance = randint(1, 100)
-        if featureChance <= map.chanceFeatures[self.tiledata[f"{x}, {y}"]['terrain']]:
+        if featureChance <= Map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
           numfeatures = randint(1, 3)
           match numfeatures:
             case 1:
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
             case 2:
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
-              
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+
             case 3:
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
-              self.tiledata[f"{x}, {y}"]['features'].append(choice(map.features[self.tiledata[f'{x}, {y}']['terrain']]))
-          
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
 
             
             
 
-
-              
+  def cgen(self): # generate with chunking
+    pass
         
 
   def display(self):
     for y in range(self.height):
       row = []
       for x in range(self.width):
-        terrain = self.tiledata[f"{x}, {y}"]['terrain']
+        terrain = self.tiledata[(x, y)]['terrain']
         if terrain == 'plains':
             row.append(f"{color.lightgreen}P{color.end}")
         elif terrain == 'forest':
@@ -113,7 +110,7 @@ class map:
    for y in range(self.height):
       row = []
       for x in range(self.width):
-        terrain = self.tiledata[f"{x}, {y}"]['terrain']
+        terrain = self.tiledata[(x, y)]['terrain']
         if terrain == 'plains':
             row.append(f"{color.lightgreen}#{color.end}")
         elif terrain == 'forest':
@@ -142,8 +139,8 @@ class map:
     
         
 
-#testMap = map(145, 20 )
+testMap = Map(160, 20)
 #print(testMap.tiledata)
 #testMap.display()
-#testMap.displaysolid()
-# testMap.printfeatures()
+testMap.displaysolid()
+#testMap.printfeatures()
