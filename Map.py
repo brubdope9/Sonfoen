@@ -48,12 +48,14 @@ class Map:
     self.height = height
     self.type = type
     self.tiledata = {}
+    self.cseeds = {}
     if not cgen:
       Map.generate(self)
     else:
-        self.overworld = self.tiledata
-        self.chunked = True
-    self.cseeds = {}
+        self.cgen()
+
+    self.overworld = self.tiledata
+
 
 
 
@@ -100,17 +102,18 @@ class Map:
             
 
   def cgen(self): # generate with chunking
-      x_offset = randint(1, 10000)
-      y_offset = x_offset / 2
-
+      chunk_x, chunk_y = 0, 0  # initialize chunk coordinates
+      seed = randint(1, 1000000)  # generate a random seed for this chunk
+      self.cseeds[(chunk_x, chunk_y)] = seed  # store the seed for this chunk
+      scale = 5
       for x in range(self.width):
           for y in range(self.height):
-              # scale = 55.6
-              scale = 10
+
+
+
 
               # terrainValue  = perlin(x/scale, y/scale, octaves=2, persistence=0.6, lacunarity=2.5, base=base,)
-              terrainValue = octave_noise2((x + x_offset) / scale, (y + y_offset) / scale, octaves=6, persistence=0.3,
-                                           lacunarity=3.0)
+              terrainValue = octave_noise2(x / scale, y/ scale, octaves=6, persistence=0.3, lacunarity=3.0, seed=seed)
 
               if terrainValue >= 0.53:
                   self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'mountain', 'items': [], 'features': []}
@@ -143,7 +146,36 @@ class Map:
                               choice(Map.features[self.tiledata[(x, y)]['terrain']]))
                           self.tiledata[(x, y)]['features'].append(
                               choice(Map.features[self.tiledata[(x, y)]['terrain']]))
-        
+
+  def loadChunk(self, chunk_x, chunk_y):
+    seed = randint(1, 1000000)  # generate a random seed for this chunk
+    self.cseeds[(chunk_x, chunk_y)] = seed  # store the seed for this chunk
+    scale = 5
+    for x in range(chunk_x * self.width, (chunk_x + 1) * self.width):
+        for y in range(chunk_y * self.height, (chunk_y + 1) * self.height):
+            global_x = x + chunk_x * self.width
+            global_y = y + chunk_y * self.height
+            self.tiledata[(global_x, global_y)] = {...}
+            # terrainValue  = perlin(x/scale, y/scale, octaves=2, persistence=0.6, lacunarity=2.5, base=base,)
+            terrainValue = octave_noise2(x / scale, y/ scale, octaves=6, persistence=0.3, lacunarity=3.0, seed=seed)
+
+            if terrainValue >= 0.53:
+                self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'mountain', 'items': [], 'features': []}
+            elif terrainValue >= 0.36:
+                self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'forest', 'items': [], 'features': []}
+            elif terrainValue >= 0.045:
+                self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'plains', 'items': [], 'features': []}
+            elif terrainValue >= -0.1:
+                self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'beach', 'items': [], 'features': []}
+            else:
+                self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'water', 'items': [], 'features': []}
+
+
+
+  def UnloadChunk(self, chunk_x, chunk_y):
+    for x in range(self.width*(chunk_x+1)):
+        for y in range(self.height*(chunk_y+1)):
+            self.tiledata.pop((x, y))
 
   def display(self):
     for y in range(self.height):
@@ -176,6 +208,37 @@ class Map:
         elif terrain == 'beach':
             row.append(f"{color.tan}#{color.end}")    
       print(''.join(row))
+
+  def displaysolidAll(self):
+      if not isinstance(self.tiledata, dict):
+          raise ValueError("self.tiledata must be a dictionary")
+
+      min_x = min(chunk_x for chunk_x, chunk_y in self.cseeds)
+      max_x = max(chunk_x for chunk_x, chunk_y in self.cseeds)
+      min_y = min(chunk_y for chunk_x, chunk_y in self.cseeds)
+      max_y = max(chunk_y for chunk_x, chunk_y in self.cseeds)
+
+      for y in range((max_y + 1) * self.height, (min_y - 1) * self.height - 1, -1):
+          row = []
+          for x in range((min_x - 1) * self.width, (max_x + 1) * self.width):
+              if (x, y) in self.tiledata:
+
+                  terrain = self.tiledata[(x, y)]['terrain']
+                  if terrain == 'plains':
+                      row.append(f"{color.lightgreen}#{color.end}")
+                  elif terrain == 'forest':
+                      row.append(f"{color.darkgreen}#{color.end}")
+                  elif terrain == 'mountain':
+                      row.append(f"{color.magenta}#{color.end}")
+                  elif terrain == 'water':
+                      row.append(f"{color.blue}#{color.end}")
+                  elif terrain == 'beach':
+                      row.append(f"{color.tan}#{color.end}")
+              else:
+                  row.append(' ')
+                  print((x, y), isinstance(self.tiledata, dict))
+            # print(''.join(row))
+
   def generateSubMap(self):
     pass
   
@@ -183,9 +246,8 @@ class Map:
       
   
   def printfeatures(self):
-    for x in range( self.width):
-      for y in range(self.height):
-        print(f"{x}, {y}: {self.tiledata[f'{x}, {y}']['features']}")
+    for data in self.tiledata:
+        print(data)
 
   def add_item(self, x:int, y:int, item:str):
     self.tiledata[f"{x}, {y}"]['items'].append(item)
@@ -193,8 +255,11 @@ class Map:
     
         
 
-testMap = Map(160, 20)
+testMap = Map(20, 7, cgen=True)
 #print(testMap.tiledata)
 #testMap.display()
-testMap.displaysolid()
+testMap.loadChunk(0, -1)
+# testMap.displaysolid()
+testMap.displaysolidAll()
 #testMap.printfeatures()
+
