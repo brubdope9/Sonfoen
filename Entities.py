@@ -1,4 +1,4 @@
-from Player import Player
+from p import Player
 
 class Entity(Player):
     super().updateAll()

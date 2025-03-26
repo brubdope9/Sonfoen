@@ -1,7 +1,4 @@
-from random import randint, choice
-import os
-# import unicurses as c
-import threading
+import Player
 class color:
    purple = '\033[38;5;135m'
    cyan = '\033[38;5;51m'
@@ -18,6 +15,3 @@ class color:
    bold = '\033[1m'
    underline = '\033[4m'
    end = '\033[0m'
-def clear():
-  os.system('clear')
-# c.initscr()

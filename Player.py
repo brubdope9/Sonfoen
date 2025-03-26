@@ -1,7 +1,8 @@
 from main import color
 from Items import items
+from Map import Map
 # from Actions import Actions
-class Player:
+class player:
   def __init__(self, pos:list):
     self.pos = pos
     self.hp = 100
@@ -112,20 +113,9 @@ class Player:
   def equipItem(self, item:str):
     if item in items:
       self.equips[items[item]['slot']] = items[item]
+  def setMap(self, map:Map):
+    self.map = map
 
 
-P = Player([0,0])
 
-P.printStats()
-print('\n'*5)
-
-P.add_item('sword')
-P.equipItem('sword')
-P.add_item('shield')
-P.equipItem('shield')
-P.updateAll()
-
-print(P.equips['weapon'])
-
-P.printStats()
 
