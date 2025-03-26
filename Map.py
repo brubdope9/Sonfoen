@@ -2,6 +2,9 @@ from random import randint, choice
 from Items import items
 from main import color
 from opensimplex import OpenSimplex
+from Player import player
+
+
 
 gen = OpenSimplex(seed=randint(1, 1000000))
 def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0, seed = 0):
@@ -39,11 +42,10 @@ class Map:
   chanceFeatures = {'plains': 15,'forest': 45, 'mountain': 25, 'water': 30, 'beach': 1}
   structures = {'plains': ['farm', 'village'], 'forest': ['cabin', 'camp'], 'mountain': ['mine', 'cabin'], 'water': ['dock', 'shipwreck'], 'beach': ['dock', 'cabin']}
   chanceStructures = {'plains': 3,'forest': 7, 'mountain': 8, 'water': 2, 'beach': 2}
-
   
   
   
-  def __init__(self, width:int, height:int, type:str = 'plains', cgen:bool = False):
+  def __init__(self, width:int, height:int, type:str = 'plains', cgen:bool = False, mplayer:player = None):
     self.width = width
     self.height = height
     self.type = type
@@ -53,6 +55,11 @@ class Map:
       Map.generate(self)
     else:
         self.cgen()
+        self.loadedChunks = {}
+    if mplayer:
+        self.player = mplayer
+        self.player.setMap(self)
+
 
     self.overworld = self.tiledata
 
@@ -153,9 +160,9 @@ class Map:
     scale = 5
     for x in range(chunk_x * self.width, (chunk_x + 1) * self.width):
         for y in range(chunk_y * self.height, (chunk_y + 1) * self.height):
-            global_x = x + chunk_x * self.width
-            global_y = y + chunk_y * self.height
-            self.tiledata[(global_x, global_y)] = {...}
+            #global_x = x + chunk_x * self.width
+            #global_y = y + chunk_y * self.height
+
             # terrainValue  = perlin(x/scale, y/scale, octaves=2, persistence=0.6, lacunarity=2.5, base=base,)
             terrainValue = octave_noise2(x / scale, y/ scale, octaves=6, persistence=0.3, lacunarity=3.0, seed=seed)
 
@@ -171,11 +178,8 @@ class Map:
                 self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'water', 'items': [], 'features': []}
 
 
-
   def UnloadChunk(self, chunk_x, chunk_y):
-    for x in range(self.width*(chunk_x+1)):
-        for y in range(self.height*(chunk_y+1)):
-            self.tiledata.pop((x, y))
+   pass
 
   def display(self):
     for y in range(self.height):
@@ -190,6 +194,9 @@ class Map:
             row.append(f"{color.magenta}M{color.end}")
         elif terrain == 'water':
             row.append(f"{color.blue}#{color.end}")
+        elif terrain == 'beach':
+            row.append(f"{color.tan}#{color.end}")
+
       print(' '.join(row))
 
   def displaysolid(self):
@@ -210,9 +217,6 @@ class Map:
       print(''.join(row))
 
   def displaysolidAll(self):
-      if not isinstance(self.tiledata, dict):
-          raise ValueError("self.tiledata must be a dictionary")
-
       min_x = min(chunk_x for chunk_x, chunk_y in self.cseeds)
       max_x = max(chunk_x for chunk_x, chunk_y in self.cseeds)
       min_y = min(chunk_y for chunk_x, chunk_y in self.cseeds)
@@ -224,7 +228,10 @@ class Map:
               if (x, y) in self.tiledata:
 
                   terrain = self.tiledata[(x, y)]['terrain']
-                  if terrain == 'plains':
+                  if hasattr(self, 'player') and self.player.pos == [x, y]:
+                      row.append(f"{color.red}P{color.end}")
+
+                  elif terrain == 'plains':
                       row.append(f"{color.lightgreen}#{color.end}")
                   elif terrain == 'forest':
                       row.append(f"{color.darkgreen}#{color.end}")
@@ -234,10 +241,7 @@ class Map:
                       row.append(f"{color.blue}#{color.end}")
                   elif terrain == 'beach':
                       row.append(f"{color.tan}#{color.end}")
-              else:
-                  row.append(' ')
-                  print((x, y), isinstance(self.tiledata, dict))
-            # print(''.join(row))
+          print(''.join(row))
 
   def generateSubMap(self):
     pass
@@ -258,7 +262,7 @@ class Map:
 testMap = Map(20, 7, cgen=True)
 #print(testMap.tiledata)
 #testMap.display()
-testMap.loadChunk(0, -1)
+testMap.loadChunk(21, 1)
 # testMap.displaysolid()
 testMap.displaysolidAll()
 #testMap.printfeatures()
