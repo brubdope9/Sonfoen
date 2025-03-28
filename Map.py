@@ -1,6 +1,6 @@
 from random import randint, choice
 from Items import items
-from main import color
+from Color import color
 from opensimplex import OpenSimplex
 from Player import player
 
@@ -34,7 +34,7 @@ def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0, seed = 0):
 
 
 
-class Map:
+class map:
   terrain = ['plains', 'forest', 'mountain', 'water', 'beach']
   features = {'plains':['bush', 'tree' ],'forest': ['tree', 'bush'], 'mountain': ['boulder', 'cave'], 'water': ['seaweed', 'coral'], 'beach': ['palm tree', ]}
   naturalItems = {'plains':[],'forest': ['stick', 'rock', 'mushroom'], 'mountain': ['rock', 'gem', 'fossil'], 'water': ['fish', 'shell', 'seaweed'], 'beach': ['shell', 'seaweed', 'rock']}
@@ -52,7 +52,7 @@ class Map:
     self.tiledata = {}
     self.cseeds = {}
     if not cgen:
-      Map.generate(self)
+      map.generate(self)
     else:
         self.cgen()
         self.loadedChunks = {}
@@ -91,19 +91,19 @@ class Map:
           self.tiledata[(x, y)] = {'tile':(x, y),'terrain': 'water', 'items': [],'features': []}
          # add features
         featureChance = randint(1, 100)
-        if featureChance <= Map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
+        if featureChance <= map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
           numfeatures = randint(1, 3)
           match numfeatures:
             case 1:
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
             case 2:
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
 
             case 3:
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
-              self.tiledata[(x, y)]['features'].append(choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
+              self.tiledata[(x, y)]['features'].append(choice(map.features[self.tiledata[(x, y)]['terrain']]))
 
             
             
@@ -134,25 +134,25 @@ class Map:
                   self.tiledata[(x, y)] = {'tile': (x, y), 'terrain': 'water', 'items': [], 'features': []}
               # add features
               featureChance = randint(1, 100)
-              if featureChance <= Map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
+              if featureChance <= map.chanceFeatures[self.tiledata[(x, y)]['terrain']]:
                   numfeatures = randint(1, 3)
                   match numfeatures:
                       case 1:
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
                       case 2:
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
 
                       case 3:
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
                           self.tiledata[(x, y)]['features'].append(
-                              choice(Map.features[self.tiledata[(x, y)]['terrain']]))
+                              choice(map.features[self.tiledata[(x, y)]['terrain']]))
 
   def loadChunk(self, chunk_x, chunk_y):
     seed = randint(1, 1000000)  # generate a random seed for this chunk
@@ -241,6 +241,8 @@ class Map:
                       row.append(f"{color.blue}#{color.end}")
                   elif terrain == 'beach':
                       row.append(f"{color.tan}#{color.end}")
+                  else:
+                      row.append(" ")
           print(''.join(row))
 
   def generateSubMap(self):
@@ -258,8 +260,8 @@ class Map:
 
     
         
-
-testMap = Map(20, 7, cgen=True)
+'''
+testMap = map(20, 7, cgen=True)
 #print(testMap.tiledata)
 #testMap.display()
 testMap.loadChunk(21, 1)
@@ -267,3 +269,4 @@ testMap.loadChunk(21, 1)
 testMap.displaysolidAll()
 #testMap.printfeatures()
 
+'''
