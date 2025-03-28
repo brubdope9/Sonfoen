@@ -1,6 +1,6 @@
-from main import color
+from Color import color
 from Items import items
-from Map import Map
+
 # from Actions import Actions
 class player:
   def __init__(self, pos:list):
@@ -113,9 +113,29 @@ class player:
   def equipItem(self, item:str):
     if item in items:
       self.equips[items[item]['slot']] = items[item]
-  def setMap(self, map:Map):
+  def setMap(self, map):
     self.map = map
 
-
-
+  def move(self,direction, tilenum = 1):
+    # could do this with one statement
+    if direction == 'up':
+     try:
+      self.pos[1] += tilenum
+     except KeyError:
+         print ("out of bounds")
+    elif direction == 'down':
+     try:
+      self.pos[1] -= tilenum
+     except KeyError:
+        print("out of bounds")
+    elif direction == 'left':
+      try:
+       self.pos[0] -= tilenum
+      except KeyError:
+          print("out of bounds")
+    elif direction == 'right':
+      try:
+       self.pos[0] += tilenum
+      except KeyError:
+          print("out of bounds")
 
