@@ -6,7 +6,7 @@ from Player import player
 
 
 
-gen = OpenSimplex(seed=randint(1, 1000000))
+
 def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0, seed = 0):
           """ Mimics pnoise2 with octaves, persistence, and lacunarity """
           amplitude = 1.0  # Controls how strong each layer of noise is
@@ -22,7 +22,7 @@ def octave_noise2(x, y, octaves=1, persistence=0.5, lacunarity=2.0, seed = 0):
 
           else:
             for _ in range(octaves):
-                value += gen.noise2(x * frequency, y * frequency) * amplitude
+                value += OpenSimplex(seed=randint).noise2(x * frequency, y * frequency) * amplitude
                 max_amplitude += amplitude
                 amplitude *= persistence  # Reduces amplitude for next octave
                 frequency *= lacunarity  # Increases frequency for next octave
@@ -39,7 +39,7 @@ class map:
   features = {'plains':['bush', 'tree' ],'forest': ['tree', 'bush'], 'mountain': ['boulder', 'cave'], 'water': ['seaweed', 'coral'], 'beach': ['palm tree', ]}
   naturalItems = {'plains':[],'forest': ['stick', 'rock', 'mushroom'], 'mountain': ['rock', 'gem', 'fossil'], 'water': ['fish', 'shell', 'seaweed'], 'beach': ['shell', 'seaweed', 'rock']}
   chanceItems = {'plains': 10,'forest': 20, 'mountain': 15, 'water': 45}
-  chanceFeatures = {'plains': 15,'forest': 45, 'mountain': 25, 'water': 30, 'beach': 1}
+  chanceFeatures = {'plains': 15,'forest': 45, 'mountain': 25, 'water': 35, 'beach': 1}
   structures = {'plains': ['farm', 'village'], 'forest': ['cabin', 'camp'], 'mountain': ['mine', 'cabin'], 'water': ['dock', 'shipwreck'], 'beach': ['dock', 'cabin']}
   chanceStructures = {'plains': 3,'forest': 7, 'mountain': 8, 'water': 2, 'beach': 2}
   
@@ -54,8 +54,9 @@ class map:
     if not cgen:
       map.generate(self)
     else:
+        self.loadedChunks = []
         self.cgen()
-        self.loadedChunks = {}
+        
     if mplayer:
         self.player = mplayer
         self.player.setMap(self)
@@ -109,9 +110,15 @@ class map:
             
 
   def cgen(self): # generate with chunking
+      
       chunk_x, chunk_y = 0, 0  # initialize chunk coordinates
-      seed = randint(1, 1000000)  # generate a random seed for this chunk
-      self.cseeds[(chunk_x, chunk_y)] = seed  # store the seed for this chunk
+      if (0, 0) in self.cseeds:
+          seed = self.cseeds[(0, 0)]
+          self.loadedChunks.append((0, 0))
+      else:
+          seed = randint(1, 1000000)  # generate a random seed for this chunk
+          self.cseeds[(chunk_x, chunk_y)] = seed  # store the seed for this chunk
+          self.loadedChunks.append((0, 0))
       scale = 5
       for x in range(self.width):
           for y in range(self.height):
@@ -155,9 +162,14 @@ class map:
                               choice(map.features[self.tiledata[(x, y)]['terrain']]))
 
   def loadChunk(self, chunk_x, chunk_y):
-    seed = randint(1, 1000000)  # generate a random seed for this chunk
+    self.loadedChunks.append((chunk_x, chunk_y))
+    if (chunk_x, chunk_y) in self.cseeds:
+        seed = self.cseeds[(chunk_x, chunk_y)]
+    else:
+        seed = randint(1, 1000000)  # generate a random seed for this chunk
     self.cseeds[(chunk_x, chunk_y)] = seed  # store the seed for this chunk
     scale = 5
+    
     for x in range(chunk_x * self.width, (chunk_x + 1) * self.width):
         for y in range(chunk_y * self.height, (chunk_y + 1) * self.height):
             #global_x = x + chunk_x * self.width
@@ -179,7 +191,15 @@ class map:
 
 
   def UnloadChunk(self, chunk_x, chunk_y):
-   pass
+    # Remove the chunk from the loaded chunks
+    if (chunk_x, chunk_y) in self.loadedChunks:
+     self.loadedChunks.remove((chunk_x, chunk_y))
+
+    # Unload the tiles in the chunk
+    for x in range(chunk_x * self.width, (chunk_x + 1) * self.width):
+        for y in range(chunk_y * self.height, (chunk_y + 1) * self.height):
+            if (x, y) in self.tiledata:
+               self.tiledata.pop((x, y))
 
   def display(self):
     for y in range(self.height):
@@ -199,52 +219,45 @@ class map:
 
       print(' '.join(row))
 
-  def displaysolid(self):
-   for y in range(self.height):
-      row = []
-      for x in range(self.width):
-        terrain = self.tiledata[(x, y)]['terrain']
-        if terrain == 'plains':
-            row.append(f"{color.lightgreen}#{color.end}")
-        elif terrain == 'forest':
-            row.append(f"{color.darkgreen}#{color.end}")
-        elif terrain == 'mountain':
-            row.append(f"{color.magenta}#{color.end}")
-        elif terrain == 'water':
-            row.append(f"{color.blue}#{color.end}")
-        elif terrain == 'beach':
-            row.append(f"{color.tan}#{color.end}")    
-      print(''.join(row))
-
   def displaysolidAll(self):
-      min_x = min(chunk_x for chunk_x, chunk_y in self.cseeds)
-      max_x = max(chunk_x for chunk_x, chunk_y in self.cseeds)
-      min_y = min(chunk_y for chunk_x, chunk_y in self.cseeds)
-      max_y = max(chunk_y for chunk_x, chunk_y in self.cseeds)
+    # Determine the bounds of the chunks
+    min_chunk_x = min(chunk_x for chunk_x, chunk_y in self.loadedChunks)
+    max_chunk_x = max(chunk_x for chunk_x, chunk_y in self.loadedChunks)
+    min_chunk_y = min(chunk_y for chunk_x, chunk_y in self.loadedChunks)
+    max_chunk_y = max(chunk_y for chunk_x, chunk_y in self.loadedChunks)
 
-      for y in range((max_y + 1) * self.height, (min_y - 1) * self.height - 1, -1):
-          row = []
-          for x in range((min_x - 1) * self.width, (max_x + 1) * self.width):
-              if (x, y) in self.tiledata:
+    # Calculate the bounds of the grid in terms of tile coordinates
+    min_x = min_chunk_x * self.width
+    max_x = (max_chunk_x + 1) * self.width - 1
+    min_y = min_chunk_y * self.height
+    max_y = (max_chunk_y + 1) * self.height - 1
 
-                  terrain = self.tiledata[(x, y)]['terrain']
-                  if hasattr(self, 'player') and self.player.pos == [x, y]:
-                      row.append(f"{color.red}P{color.end}")
-
-                  elif terrain == 'plains':
-                      row.append(f"{color.lightgreen}#{color.end}")
-                  elif terrain == 'forest':
-                      row.append(f"{color.darkgreen}#{color.end}")
-                  elif terrain == 'mountain':
-                      row.append(f"{color.magenta}#{color.end}")
-                  elif terrain == 'water':
-                      row.append(f"{color.blue}#{color.end}")
-                  elif terrain == 'beach':
-                      row.append(f"{color.tan}#{color.end}")
-                  else:
-                      row.append(" ")
-          print(''.join(row))
-
+    # Iterate over the grid and construct the rows
+    for y in range(max_y, min_y - 1, -1):  # Iterate from top to bottom
+        row = []
+        for x in range(min_x, max_x + 1):  # Iterate from left to right
+            if (x, y) in self.tiledata:
+                terrain = self.tiledata[(x, y)]['terrain']
+                if self.player.pos == [x, y]:
+                    row.append(f"{color.red}P{color.end}")
+                elif terrain == 'plains':
+                    row.append(f"{color.lightgreen}#{color.end}")
+                elif terrain == 'forest':
+                    row.append(f"{color.darkgreen}#{color.end}")
+                elif terrain == 'mountain':
+                    row.append(f"{color.magenta}#{color.end}")
+                elif terrain == 'water':
+                    row.append(f"{color.blue}#{color.end}")
+                elif terrain == 'beach':
+                    row.append(f"{color.tan}#{color.end}")
+                else:
+                    row.append(" ")
+            else:
+                # Add a placeholder for empty tiles
+                row.append(" ")
+        # Print the row, even if it's empty
+        print(''.join(row))
+        
   def generateSubMap(self):
     pass
   
